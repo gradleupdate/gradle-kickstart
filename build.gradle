@@ -1,0 +1,26 @@
+apply plugin: 'base'
+
+// alle Skripte aus ./gradle.d in sortierter Reihenfolge einbinden
+file('gradle.d').listFiles().sort().each {
+    if (it =~ /.*\.gradle$/) {
+        apply from: relativePath(it)
+    }
+}
+
+allprojects {
+    group = 'com.github.matthiasbalke'
+
+	// creates the continuous delivery release version
+	// s. gradle.d/15-versioning.gradle
+    version = project.getBuildVersion('0.0.1')
+
+    buildscript {
+        repositories {
+            jcenter()
+        }
+    }
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion '2.14'
+}

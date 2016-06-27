@@ -1,0 +1,69 @@
+machine:
+  java:
+    version: oraclejdk8
+
+# use pip to install docker-compose
+#  python:
+#    version: 2.7.3
+
+#  services:
+#    - docker
+
+dependencies:
+# install docker-compose working with circleci docker version
+#  pre:
+#    - sudo pip install docker-compose==1.5.2
+
+# define extra cache directories
+#  cache_directories:
+#    - "~/docker"
+
+  override:
+#    - docker version
+#    - docker info
+#    - docker-compose version
+#    - if [[ -e ~/docker/java.tar ]]; then docker load --input ~/docker/java.tar; fi
+
+    - ./gradlew --console=plain clean build
+
+    # pull image here to cache it and speed up the test
+#    - docker images
+
+#    - mkdir -p ~/docker
+
+    # cache images here
+#    - docker save java:8 > ~/docker/java.tar
+
+  post:
+    # save junit test results as XML
+    - mkdir -p $CIRCLE_TEST_REPORTS/junit/
+    - find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
+
+    - mkdir -p $CIRCLE_ARTIFACTS/build-artifacts
+    # save your build artifacts
+    # - cp -a myComponent/build/libs/mycomponent*.jar $CIRCLE_ARTIFACTS/build-artifacts/
+
+#test:
+# start your docker container here
+#  pre:
+#    - docker-compose up -d myContainer
+
+# do some health checking
+#  override:
+#    - curl --retry 10 --retry-delay 5 -v http://localhost:8080/health
+
+# save the docker logs
+#  post:
+#    - echo "Running Docker containers"; docker ps -a
+#    - echo "Stopping all Docker containers"; docker stop $(docker ps -a -q)
+#    - mkdir -p $CIRCLE_TEST_REPORTS/docker/
+#    - docker logs gradle_bootstrap_1         > $CIRCLE_TEST_REPORTS/docker/gradle_bootstrap.log
+
+# save your docker login credentials as circleci environment variables (DOCKER_EMAIL, DOCKER_USER, DOCKER_PASS)
+# push your docker container to hub.docker.com
+#deployment:
+#  hub:
+#    branch: master
+#    commands:
+#      - if [ "$CIRCLE_PR_NUMBER" = ""  ]; then docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS; fi
+#      - if [ "$CIRCLE_PR_NUMBER" = ""  ]; then docker push myGroup/harvester; else echo 'Skipping Docker deployment for PRs!'; fi
